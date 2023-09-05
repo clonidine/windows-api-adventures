@@ -6,8 +6,8 @@ use windows::{
 pub unsafe fn create_message_box(title: &str, message: &str) {
     MessageBoxW(
         None,
-        PCWSTR::from_raw(message.as_ptr() as *const u16),
-        PCWSTR::from_raw(title.as_ptr() as *const u16),
+        PCWSTR::from_raw(message.encode_utf16().collect::<Vec<_>>().as_ptr()),
+        PCWSTR::from_raw(title.encode_utf16().collect::<Vec<_>>().as_ptr()),
         MB_OK | MB_ICONINFORMATION,
     );
 }
