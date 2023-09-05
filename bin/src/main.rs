@@ -1,5 +1,6 @@
-use lib::create_message_box;
+use lib::open_process;
+use windows::core::Result;
 
-fn main() {
-    create_message_box()
+fn main() -> Result<()> {
+    open_process(12532)
 }

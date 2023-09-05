@@ -1,10 +1,19 @@
 use windows::{
-    core::h,
-    Win32::UI::WindowsAndMessaging::{MessageBoxW, MB_OK},
+    core::Result,
+    Win32::System::Threading::{OpenProcess, PROCESS_ACCESS_RIGHTS},
 };
 
-pub fn create_message_box() {
-    unsafe {
-        MessageBoxW(None, h!("Hello!"), h!("Hi!"), MB_OK);
+pub fn open_process(process_id: u32) -> Result<()> {
+    let process = unsafe { OpenProcess(PROCESS_ACCESS_RIGHTS(0x1F0FFF), false, process_id) };
+
+    match process {
+        Ok(process) => {
+            println!("Process handle: {:?}", process);
+        }
+        Err(error) => {
+            println!("Error: {:?}", error);
+        }
     }
+
+    Ok(())
 }
