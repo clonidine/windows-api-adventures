@@ -9,8 +9,8 @@ pub fn open_process(process_id: u32) -> Result<()> {
     let handle = unsafe { OpenProcess(PROCESS_ACCESS_RIGHTS(ACCESS_RIGHTS), false, process_id) };
 
     match handle {
-        Ok(process) => {
-            println!("Process handle: {:?}", process);
+        Ok(handle) => {
+            println!("Process handle: {:?}", handle);
         }
         Err(error) => {
             println!("Error: {:?}", error);
