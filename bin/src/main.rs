@@ -1,5 +1,6 @@
 use lib::create_message_box;
+use windows::core::Result;
 
-fn main() {
+fn main() -> Result<()> {
     create_message_box("Bitch", "Message")
 }

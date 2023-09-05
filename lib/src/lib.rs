@@ -1,9 +1,9 @@
 use windows::{
-    core::PCWSTR,
+    core::{Result, PCWSTR},
     Win32::UI::WindowsAndMessaging::{MessageBoxW, MB_ICONINFORMATION, MB_OK},
 };
 
-pub fn create_message_box(title: &str, message: &str) {
+pub fn create_message_box(title: &str, message: &str) -> Result<()> {
     unsafe {
         MessageBoxW(
             None,
@@ -12,4 +12,6 @@ pub fn create_message_box(title: &str, message: &str) {
             MB_OK | MB_ICONINFORMATION,
         );
     }
+
+    Ok(())
 }
