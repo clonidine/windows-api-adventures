@@ -1,17 +1,10 @@
 use windows::{
-    core::{Result, PCWSTR},
-    Win32::UI::WindowsAndMessaging::{MessageBoxW, MB_ICONINFORMATION, MB_OK},
+    core::h,
+    Win32::UI::WindowsAndMessaging::{MessageBoxW, MB_OK},
 };
 
-pub fn create_message_box(title: &str, message: &str) -> Result<()> {
+pub fn create_message_box() {
     unsafe {
-        MessageBoxW(
-            None,
-            PCWSTR::from_raw(message.encode_utf16().collect::<Vec<_>>().as_ptr()),
-            PCWSTR::from_raw(title.encode_utf16().collect::<Vec<_>>().as_ptr()),
-            MB_OK | MB_ICONINFORMATION,
-        );
+        MessageBoxW(None, h!("Hello!"), h!("Hi!"), MB_OK);
     }
-
-    Ok(())
 }
