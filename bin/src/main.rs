@@ -5,7 +5,7 @@ fn main() -> Result<()> {
     let pid = get_pid();
     let content = get_content();
 
-    inject(&content, pid) // bytes: 17
+    inject(&content, pid)
 }
 
 fn get_pid() -> u32 {
