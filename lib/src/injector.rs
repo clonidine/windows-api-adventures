@@ -3,6 +3,7 @@ use std::ffi::CString;
 
 use windows::core::Result;
 
+use crate::process::get_process_name;
 use crate::{
     memory::{alloc_mem, write_process_memory},
     process::{close_handle, get_process_handle},
@@ -23,9 +24,13 @@ pub fn inject(content: &str, pid: u32) -> Result<()> {
 
             match mem_written {
                 Ok(_) => {
+                    let process_name = get_process_name(pid)?;
+
                     println!("---------------------------");
                     println!("Process memory written!");
                     println!("Memory Address: {:p}", mem_addr);
+                    println!("PID: {}", pid);
+                    println!("Process Name: {}", process_name);
                     println!("---------------------------");
                 }
 
@@ -35,6 +40,7 @@ pub fn inject(content: &str, pid: u32) -> Result<()> {
 
         Err(e) => panic!("Cannot convert content to CString: {}", e),
     }
+
     let handle_closed = close_handle(handle);
 
     match handle_closed {
