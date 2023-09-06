@@ -28,8 +28,10 @@ pub fn inject(content: &str, pid: u32) -> Result<()> {
 
             match mem_written {
                 Ok(_) => {
+                    println!("---------------------------");
                     println!("Process memory written!");
                     println!("Memory Address: {:p}", mem_addr);
+                    println!("---------------------------");
                 }
 
                 Err(e) => panic!("Cannot write process memory: {}", e),

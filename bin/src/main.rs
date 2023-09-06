@@ -1,17 +1,33 @@
 use lib::injector::inject;
 use windows::core::Result;
 
-const PID: u32 = 0;
-
 fn main() -> Result<()> {
-    let injected = inject("Lorde best friend", PID); // bytes: 17
+    let pid = get_pid();
+    let content = get_content();
 
-    match injected {
-        Ok(_) => {
-            println!("PID: {}", PID);
-        }
-        Err(e) => panic!("{}", e),
-    }
+    inject(&content, pid) // bytes: 17
+}
 
-    Ok(())
+fn get_pid() -> u32 {
+    let mut pid = String::new();
+
+    println!("Enter PID: ");
+    std::io::stdin()
+        .read_line(&mut pid)
+        .expect("Failed to read line");
+
+    let pid: u32 = pid.trim().parse().expect("Please type a number!");
+
+    pid
+}
+
+fn get_content() -> String {
+    let mut content = String::new();
+
+    println!("Enter content: ");
+    std::io::stdin()
+        .read_line(&mut content)
+        .expect("Failed to read line");
+
+    content
 }
