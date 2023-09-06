@@ -27,7 +27,7 @@ pub fn inject(content: &str, pid: u32) -> Result<()> {
 
             match writed {
                 Ok(_) => {
-                    println!("Process memory writed!");
+                    println!("Process memory written!");
                     println!("Memory Address: {:p}", alloc);
                 }
                 
