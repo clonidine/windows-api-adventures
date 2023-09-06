@@ -1,13 +1,12 @@
 use std::ffi::c_void;
 use std::ffi::CString;
 
+use lib::memory::alloc_mem;
+use lib::memory::write_process_memory;
+use lib::process::close_handle;
+use lib::process::get_process_handle;
+use lib::process::get_process_name;
 use windows::core::Result;
-
-use crate::process::get_process_name;
-use crate::{
-    memory::{alloc_mem, write_process_memory},
-    process::{close_handle, get_process_handle},
-};
 
 pub fn inject(content: &str, pid: u32) -> Result<()> {
     let handle = get_process_handle(pid, true)?;

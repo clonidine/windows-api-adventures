@@ -1,4 +1,6 @@
-use lib::injector::inject;
+mod injector;
+
+use injector::inject;
 use windows::core::Result;
 
 fn main() -> Result<()> {
