@@ -13,18 +13,13 @@ pub fn inject(content: &str, pid: u32) -> Result<()> {
 
     let mem_addr = alloc_mem(&handle, content)?;
 
-    let content_buffer = CString::new(content);
+    let c_str = CString::new(content);
 
-    match content_buffer {
-        Ok(content_buffer) => {
-            
-            let mem_written = write_process_memory(
-                &handle,
-                mem_addr,
-                content_buffer.as_ptr() as *const c_void,
-                content.len(),
-                None,
-            );
+    match c_str {
+        Ok(c_str) => {
+            let buffer = c_str.as_ptr() as *const c_void;
+
+            let mem_written = write_process_memory(&handle, mem_addr, buffer, content.len(), None);
 
             match mem_written {
                 Ok(_) => {
