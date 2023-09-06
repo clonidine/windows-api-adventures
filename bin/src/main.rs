@@ -1,6 +1,17 @@
-use lib::open_process;
+use lib::injector::inject;
 use windows::core::Result;
 
+const PID: u32 = 0;
+
 fn main() -> Result<()> {
-    open_process(12532)
+    let injected = inject("Lorde best friend", PID); // bytes: 17
+
+    match injected {
+        Ok(_) => {
+            println!("Process Thread ID: {}", PID);
+        }
+        Err(e) => panic!("{}", e),
+    }
+
+    Ok(())
 }
