@@ -44,6 +44,8 @@ pub fn create_remote_thread(
     lpthreadid: Option<*mut u32>,
 ) -> Result<HANDLE> {
     unsafe {
+        assert!(!handle.is_invalid());
+
         CreateRemoteThread(
             *handle,
             lpthreadattributes,

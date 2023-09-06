@@ -9,35 +9,35 @@ use crate::{
 };
 
 pub fn inject(content: &str, pid: u32) -> Result<()> {
-    let handle = get_process_handle(pid, true).unwrap();
+    let handle = get_process_handle(pid, true)?;
 
-    let alloc = alloc_mem(&handle, content);
+    let mem_addr = alloc_mem(&handle, content)?;
 
-    match alloc {
-        Ok(alloc) => {
-            let content_buffer = CString::new(content).unwrap();
+    let content_buffer = CString::new(content);
 
-            let writed = write_process_memory(
+    match content_buffer {
+        Ok(content_buffer) => {
+            
+            let mem_written = write_process_memory(
                 &handle,
-                alloc,
+                mem_addr,
                 content_buffer.as_ptr() as *const c_void,
                 content.len(),
                 None,
             );
 
-            match writed {
+            match mem_written {
                 Ok(_) => {
                     println!("Process memory written!");
-                    println!("Memory Address: {:p}", alloc);
+                    println!("Memory Address: {:p}", mem_addr);
                 }
-                
+
                 Err(e) => panic!("Cannot write process memory: {}", e),
             }
         }
 
-        Err(e) => panic!("Cannot alloc memory: {}", e),
+        Err(e) => panic!("Cannot convert content to CString: {}", e),
     }
-
     let handle_closed = close_handle(handle);
 
     match handle_closed {

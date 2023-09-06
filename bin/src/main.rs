@@ -8,7 +8,7 @@ fn main() -> Result<()> {
 
     match injected {
         Ok(_) => {
-            println!("Process Thread ID: {}", PID);
+            println!("PID: {}", PID);
         }
         Err(e) => panic!("{}", e),
     }
