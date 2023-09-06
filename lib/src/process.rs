@@ -20,8 +20,8 @@ pub fn get_process_handle(process_id: u32, binherinthandle: bool) -> Result<HAND
     }
 }
 
-pub fn get_process_name(pid: u32) -> Result<String> {
-    let handle = get_process_handle(pid, false)?;
+pub fn get_process_name(pid: u32, binherinthandle: bool) -> Result<String> {
+    let handle = get_process_handle(pid, binherinthandle)?;
 
     let mut buffer = [0u16; 260];
 

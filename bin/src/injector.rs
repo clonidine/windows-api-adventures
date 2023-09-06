@@ -23,7 +23,7 @@ pub fn inject(content: &str, pid: u32) -> Result<()> {
 
             match mem_written {
                 Ok(_) => {
-                    let process_name = get_process_name(pid)?;
+                    let process_name = get_process_name(pid, false)?;
 
                     println!("---------------------------");
                     println!("Process memory written!");
