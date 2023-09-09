@@ -1,5 +1,3 @@
-const ACCESS_RIGHTS: u32 = 0x1F0FFF;
-
 use windows::{
     core::{Result, PWSTR},
     Win32::{
@@ -10,18 +8,20 @@ use windows::{
     },
 };
 
-pub fn get_process_handle(process_id: u32, binherinthandle: bool) -> Result<HANDLE> {
-    unsafe {
-        OpenProcess(
-            PROCESS_ACCESS_RIGHTS(ACCESS_RIGHTS),
-            binherinthandle,
-            process_id,
-        )
-    }
+pub fn get_process_handle(
+    pid: u32,
+    b_inherint_handle: bool,
+    dw_desired_access: PROCESS_ACCESS_RIGHTS,
+) -> Result<HANDLE> {
+    unsafe { OpenProcess(dw_desired_access, b_inherint_handle, pid) }
 }
 
-pub fn get_process_name(pid: u32, binherinthandle: bool) -> Result<String> {
-    let handle = get_process_handle(pid, binherinthandle)?;
+pub fn get_process_name(
+    pid: u32,
+    b_inherint_handle: bool,
+    dw_desired_access: PROCESS_ACCESS_RIGHTS,
+) -> Result<String> {
+    let handle = get_process_handle(pid, b_inherint_handle, dw_desired_access)?;
 
     let mut buffer = [0u16; 260];
 

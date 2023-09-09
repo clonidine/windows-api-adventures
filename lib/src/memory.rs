@@ -1,69 +1,93 @@
-// HANDLE CreateRemoteThread(
-//   [in]  HANDLE                 hProcess,
-//   [in]  LPSECURITY_ATTRIBUTES  lpThreadAttributes,
-//   [in]  SIZE_T                 dwStackSize,
-//   [in]  LPTHREAD_START_ROUTINE lpStartAddress,
-//   [in]  LPVOID                 lpParameter,
-//   [in]  DWORD                  dwCreationFlags,
-//   [out] LPDWORD                lpThreadId
-// );
-
-use std::ffi::c_void;
-use windows::{
-    core::Result,
-    Win32::{
-        Foundation::HANDLE,
-        Security::SECURITY_ATTRIBUTES,
-        System::{
-            Diagnostics::Debug::WriteProcessMemory,
-            Memory::{VirtualAllocEx, MEM_COMMIT, PAGE_EXECUTE_READWRITE},
-            Threading::{CreateRemoteThread, LPTHREAD_START_ROUTINE},
-        },
+use eyre::Result;
+use std::{ffi::c_void, mem::transmute};
+use windows::Win32::{
+    Foundation::{GetLastError, HANDLE},
+    Security::SECURITY_ATTRIBUTES,
+    System::{
+        Diagnostics::Debug::WriteProcessMemory,
+        Memory::{VirtualAllocEx, PAGE_PROTECTION_FLAGS, VIRTUAL_ALLOCATION_TYPE},
+        Threading::{CreateRemoteThreadEx, LPPROC_THREAD_ATTRIBUTE_LIST, LPTHREAD_START_ROUTINE},
     },
 };
 
-pub fn alloc_mem(handle: &HANDLE, content: &str) -> Result<*mut c_void> {
+pub fn virtual_alloc_ex(
+    handle: &HANDLE,
+    lp_address: Option<*const c_void>,
+    dw_size: usize,
+    fl_allocation_type: VIRTUAL_ALLOCATION_TYPE,
+    fl_protect: PAGE_PROTECTION_FLAGS,
+) -> Result<*mut c_void> {
     unsafe {
+        let handle = match handle.is_invalid() {
+            true => panic!("Cannot alloc virtual ex: {:?}", GetLastError()),
+            false => handle,
+        };
+
         Ok(VirtualAllocEx(
             *handle,
-            None,
-            content.len(),
-            MEM_COMMIT,
-            PAGE_EXECUTE_READWRITE,
+            lp_address,
+            dw_size,
+            fl_allocation_type,
+            fl_protect,
         ))
     }
 }
 
 pub fn create_remote_thread(
-    handle: &HANDLE,
-    lpthreadattributes: Option<*const SECURITY_ATTRIBUTES>,
-    dwstacksize: usize,
-    lpstartaddress: LPTHREAD_START_ROUTINE,
-    lpthreadparameter: Option<*const c_void>,
-    dwcreationflags: u32,
-    lpthreadid: Option<*mut u32>,
+    handle: HANDLE,
+    lp_thread_attributes: Option<*const SECURITY_ATTRIBUTES>,
+    dw_stack_size: usize,
+    lp_start_address: LPTHREAD_START_ROUTINE,
+    lp_thread_parameter: Option<*const c_void>,
+    dw_creation_flags: u32,
+    lp_attribute_list: LPPROC_THREAD_ATTRIBUTE_LIST,
+    mut pid: u32,
 ) -> Result<HANDLE> {
     unsafe {
-        assert!(!handle.is_invalid());
+        match handle.is_invalid() {
+            true => Err(std::io::Error::last_os_error().into()),
+            false => {
+                let remote_thread = CreateRemoteThreadEx(
+                    handle,
+                    lp_thread_attributes,
+                    dw_stack_size,
+                    lp_start_address,
+                    lp_thread_parameter,
+                    dw_creation_flags,
+                    lp_attribute_list,
+                    Some(&mut pid as *mut u32),
+                );
 
-        CreateRemoteThread(
-            *handle,
-            lpthreadattributes,
-            dwstacksize,
-            lpstartaddress,
-            lpthreadparameter,
-            dwcreationflags,
-            lpthreadid,
-        )
+                match remote_thread.is_err() {
+                    true => Err(std::io::Error::last_os_error().into()),
+                    false => Ok(remote_thread?),
+                }
+            }
+        }
     }
+}
+
+pub fn transmute_value(value: *mut c_void) -> LPTHREAD_START_ROUTINE {
+    type Src = *mut c_void;
+    type Dst = unsafe extern "system" fn(*mut c_void) -> u32;
+
+    unsafe { Some(transmute::<Src, Dst>(value)) }
 }
 
 pub fn write_process_memory(
     handle: &HANDLE,
-    baseaddress: *mut c_void,
+    base_address: *mut c_void,
     buffer: *const c_void,
     size: usize,
-    numberofbyteswritten: Option<*mut usize>,
+    bytes_written: Option<*mut usize>,
 ) -> Result<()> {
-    unsafe { WriteProcessMemory(*handle, baseaddress, buffer, size, numberofbyteswritten) }
+    unsafe {
+        Ok(WriteProcessMemory(
+            *handle,
+            base_address,
+            buffer,
+            size,
+            bytes_written,
+        )?)
+    }
 }
